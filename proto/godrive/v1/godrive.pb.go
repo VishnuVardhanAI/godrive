@@ -1215,7 +1215,7 @@ const file_godrive_v1_godrive_proto_rawDesc = "" +
 	"\x0eGetDownloadURL\x12\x1e.godrive.v1.DownloadURLRequest\x1a\x1f.godrive.v1.DownloadURLResponse2\xc2\x01\n" +
 	"\x0eStorageService\x12T\n" +
 	"\rPresignUpload\x12 .godrive.v1.PresignUploadRequest\x1a!.godrive.v1.PresignUploadResponse\x12Z\n" +
-	"\x0fPresignDownload\x12\".godrive.v1.PresignDownloadRequest\x1a#.godrive.v1.PresignDownloadResponseB?Z=github.com/VishnuVardhanAI/godrive/proto/godrive/v1;godrivev1b\x06proto3"
+	"\x0fPresignDownload\x12\".godrive.v1.PresignDownloadRequest\x1a#.godrive.v1.PresignDownloadResponseB$Z\"godrive/proto/godrive/v1;godrivev1b\x06proto3"
 
 var (
 	file_godrive_v1_godrive_proto_rawDescOnce sync.Once

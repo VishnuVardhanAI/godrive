@@ -19,11 +19,14 @@ import (
 	"os"              // env config (12-factor style)
 	"time"            // timestamps and JWT expiry
 
-	gv1 "github.com/VishnuVardhanAI/godrive/proto/godrive/v1" // generated gRPC stubs
-	"github.com/golang-jwt/jwt/v5"                            // JWT creation/verification
-	"github.com/jackc/pgx/v5/pgxpool"                         // Postgres connection pool
-	"golang.org/x/crypto/bcrypt"                              // password hashing
-	"google.golang.org/grpc"                                  // gRPC server
+	gv1 "godrive/proto/godrive/v1" // generated gRPC stubs
+
+	"github.com/golang-jwt/jwt/v5"    // JWT creation/verification
+	"github.com/jackc/pgx/v5/pgxpool" // Postgres connection pool
+	"golang.org/x/crypto/bcrypt"      // password hashing
+	"google.golang.org/grpc"          // gRPC server
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // server implements gv1.AuthServiceServer. It holds its dependencies.
@@ -216,5 +219,5 @@ func must(err error) {
 // grpcErr returns a generic Unauthenticated gRPC error.
 // In production, consider returning typed errors with status/codes.
 func grpcErr(msg string) error {
-	return grpc.Errorf(16, msg) // codes.Unauthenticated = 16
+	return status.Error(codes.Unauthenticated, msg)
 }
