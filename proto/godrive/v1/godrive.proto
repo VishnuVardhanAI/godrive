@@ -2,7 +2,7 @@ syntax = "proto3";
 package godrive.v1;
 
 // go_package tells protoc where to generate Go types for this proto.
-option go_package = "github.com/you/godrive/proto/godrive/v1;godrivev1";
+option go_package = "github.com/VishnuVardhanAI/godrive/proto/godrive/v1;godrivev1";
 
 message Empty {}
 

@@ -19,11 +19,11 @@ import (
 	"os"              // env config (12-factor style)
 	"time"            // timestamps and JWT expiry
 
-	"github.com/golang-jwt/jwt/v5"                // JWT creation/verification
-	"github.com/jackc/pgx/v5/pgxpool"             // Postgres connection pool
-	gv1 "github.com/you/godrive/proto/godrive/v1" // generated gRPC stubs
-	"golang.org/x/crypto/bcrypt"                  // password hashing
-	"google.golang.org/grpc"                      // gRPC server
+	gv1 "github.com/VishnuVardhanAI/godrive/proto/godrive/v1" // generated gRPC stubs
+	"github.com/golang-jwt/jwt/v5"                            // JWT creation/verification
+	"github.com/jackc/pgx/v5/pgxpool"                         // Postgres connection pool
+	"golang.org/x/crypto/bcrypt"                              // password hashing
+	"google.golang.org/grpc"                                  // gRPC server
 )
 
 // server implements gv1.AuthServiceServer. It holds its dependencies.

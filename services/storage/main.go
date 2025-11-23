@@ -13,8 +13,8 @@ import (
 	"os"      // read env config
 	"time"    // presign expiries
 
-	gv1 "github.com/you/godrive/proto/godrive/v1" // generated gRPC stubs
-	"google.golang.org/grpc"                      // gRPC server
+	gv1 "github.com/VishnuVardhanAI/godrive/proto/godrive/v1" // generated gRPC stubs
+	"google.golang.org/grpc"                                  // gRPC server
 
 	"github.com/minio/minio-go/v7" // MinIO/S3 SDK
 	"github.com/minio/minio-go/v7/pkg/credentials"
