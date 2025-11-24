@@ -1,50 +1,44 @@
 syntax = "proto3";
+
 package godrive.v1;
 
-// go_package tells protoc where to generate Go types for this proto.
+// go_package controls the generated Go package/import path.
 option go_package = "godrive/proto/godrive/v1;godrivev1";
 
 message Empty {}
 
-///////////////////////////
-// Auth domain messages  //
-///////////////////////////
+// ===== Auth =====
 message User {
-  int64 id = 1;         // DB primary key
-  string email = 2;     // unique email
-  string created_at = 3;// ISO timestamp
+  int64 id = 1;
+  string email = 2;
+  string created_at = 3;
 }
 
 message Credentials {
   string email = 1;
-  string password = 2;  // plaintext over TLS; stored hashed server-side
+  string password = 2;
 }
 
 message Token {
-  string access_token = 1; // JWT string
-  string expires_at = 2;   // token expiry in ISO time
+  string access_token = 1;
+  string expires_at = 2;
 }
 
 service AuthService {
-  // Create a user (hash password, store in DB) and return basic info.
   rpc SignUp (Credentials) returns (User);
-  // Validate credentials and return a JWT to the client.
   rpc Login (Credentials) returns (Token);
-  // Validate a JWT and return the user payload (for gateway authz).
   rpc Verify (Token) returns (User);
 }
 
-///////////////////////////
-// Files domain messages //
-///////////////////////////
+// ===== Files (metadata only, not bytes) =====
 message FileItem {
   int64 id = 1;
-  int64 owner_id = 2;    // user ID that owns this file
-  string name = 3;       // filename as user sees it
-  string mime = 4;       // MIME type
-  int64 size_bytes = 5;  // size recorded on confirm
-  string created_at = 6; // ISO timestamp
-  string version_id = 7; // placeholder for S3 versioning later
+  int64 owner_id = 2;
+  string name = 3;
+  string mime = 4;
+  int64 size_bytes = 5;
+  string created_at = 6;
+  string version_id = 7;
 }
 
 message ListFilesRequest {
@@ -55,27 +49,12 @@ message ListFilesRequest {
 
 message ListFilesResponse {
   repeated FileItem files = 1;
-  int32 next_page = 2; // 0 if none
-}
-
-// Client asks storage for an upload URL; gateway composes this request.
-message CreateUploadIntentRequest {
-  int64 owner_id = 1;
-  string filename = 2;
-  string mime = 3;
-  int64 size_bytes = 4;
-}
-
-message CreateUploadIntentResponse {
-  string upload_url = 1;
-  string object_key = 2;              // S3 object path (e.g., user/123/...)
-  map<string,string> headers = 3;     // any required headers for PUT
-  string expires_at = 4;
+  int32 next_page = 2;
 }
 
 message ConfirmUploadRequest {
   int64 owner_id = 1;
-  string object_key = 2; // final S3 key the client PUT to
+  string object_key = 2;
   string filename = 3;
   string mime = 4;
   int64 size_bytes = 5;
@@ -91,7 +70,7 @@ message DownloadURLRequest {
 }
 
 message DownloadURLResponse {
-  string download_url = 1; // pre-signed GET URL (or placeholder in first pass)
+  string download_url = 1;
   string expires_at = 2;
 }
 
@@ -100,37 +79,37 @@ message DeleteFileRequest {
   int64 file_id = 2;
 }
 
-message DeleteFileResponse { bool ok = 1; }
+message DeleteFileResponse {
+  bool ok = 1;
+}
 
 service FilesService {
-  // Read-only listing of metadata you own.
   rpc List (ListFilesRequest) returns (ListFilesResponse);
-  // After client finishes PUT, persist metadata record.
   rpc ConfirmUpload (ConfirmUploadRequest) returns (ConfirmUploadResponse);
-  // Soft-delete later; hard delete for MVP.
   rpc Delete (DeleteFileRequest) returns (DeleteFileResponse);
-  // We’ll later change this to return object_key and let gateway presign.
   rpc GetDownloadURL (DownloadURLRequest) returns (DownloadURLResponse);
 }
 
-/////////////////////////////
-// Storage domain messages //
-/////////////////////////////
+// ===== Storage (S3/MinIO presigns) =====
+
 message PresignUploadRequest {
-  string object_key = 1;  // where the object will live
+  string object_key = 1;
   string mime = 2;
   int64 size_bytes = 3;
 }
 
 message PresignUploadResponse {
-  string url = 1;                       // PUT URL
-  map<string,string> headers = 2;       // e.g., Content-Type if required
+  string url = 1;
+  map<string, string> headers = 2;
   string expires_at = 3;
 }
 
-message PresignDownloadRequest { string object_key = 1; }
+message PresignDownloadRequest {
+  string object_key = 1;
+}
+
 message PresignDownloadResponse {
-  string url = 1;           // GET URL
+  string url = 1;
   string expires_at = 2;
 }
 

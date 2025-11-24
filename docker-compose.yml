@@ -1,82 +1,74 @@
 version: "3.9"
 services:
-  # Relational DB for users + files metadata.
   postgres:
     image: postgres:16
     environment:
       POSTGRES_USER: godrive
       POSTGRES_PASSWORD: godrive
       POSTGRES_DB: godrive
-    ports: ["5432:5432"]          # exposed for local dev
+    ports: ["5432:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
 
-  # S3-compatible storage.
   minio:
     image: minio/minio:RELEASE.2025-01-11T00-00-00Z
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: godrive
       MINIO_ROOT_PASSWORD: godrivepass
-    ports: ["9000:9000","9001:9001"]  # 9001 is MinIO console
+      # NATS target for bucket notifications
+      MINIO_NOTIFY_NATS_ENABLE_UPLOADS: "on"
+      MINIO_NOTIFY_NATS_ADDRESS_UPLOADS: "nats:4222"
+      MINIO_NOTIFY_NATS_SUBJECT_UPLOADS: "godrive.uploaded"
+    ports: ["9000:9000", "9001:9001"]
     volumes: [miniodata:/data]
 
-  # Lightweight pub/sub for future events like thumbnails/AV scan.
   nats:
     image: nats:2.10
     ports: ["4222:4222"]
 
-  # Tracing UI at http://localhost:16686
   jaeger:
     image: jaegertracing/all-in-one:1.58
-    ports: ["16686:16686","4317:4317","4318:4318"]
-
-  # ---------- Application services ----------
+    ports: ["16686:16686", "4317:4317", "4318:4318"]
 
   auth:
     build: ./services/auth
     environment:
       DB_DSN: "postgres://godrive:godrive@postgres:5432/godrive?sslmode=disable"
-      JWT_SECRET: "change-me"                 # use a strong secret outside dev
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-    depends_on: [postgres, jaeger]
+      JWT_SECRET: "change-me"
+    depends_on: [postgres]
 
   files:
     build: ./services/files
     environment:
       DB_DSN: "postgres://godrive:godrive@postgres:5432/godrive?sslmode=disable"
-      NATS_URL: "nats://nats:4222"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-    depends_on: [postgres, nats, jaeger]
+      STORAGE_ADDR: "storage:50053"   # Files calls Storage for download URLs
+    depends_on: [postgres, storage]
 
   storage:
     build: ./services/storage
     environment:
-      S3_ENDPOINT: "http://minio:9000"
+      S3_ENDPOINT: "minio:9000"
       S3_ACCESS_KEY: "godrive"
       S3_SECRET_KEY: "godrivepass"
       S3_BUCKET: "godrive"
-      S3_USE_PATH_STYLE: "true"               # needed for MinIO URLs
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-    depends_on: [minio, jaeger]
+    depends_on: [minio]
 
   ingest:
     build: ./services/ingest
     environment:
       NATS_URL: "nats://nats:4222"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-    depends_on: [nats, jaeger]
+      FILES_ADDR: "files:50052"   # gRPC endpoint for FilesService
+    depends_on: [nats, files]
 
-  # The public HTTP entrypoint (REST/JSON)
   gateway:
     build: ./services/gateway
     environment:
       AUTH_ADDR: "auth:50051"
       FILES_ADDR: "files:50052"
       STORAGE_ADDR: "storage:50053"
-      JWT_SECRET: "change-me"                 # keep in sync with auth or call Verify
-      OTEL_EXPORTER_OTLP_ENDPOINT: "http://jaeger:4317"
-    ports: ["8080:8080"]                      # your public port
-    depends_on: [auth, files, storage, jaeger]
+      JWT_SECRET: "change-me"
+    ports: ["8080:8080"]
+    depends_on: [auth, files, storage]
 
 volumes:
   pgdata: {}

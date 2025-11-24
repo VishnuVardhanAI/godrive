@@ -28,11 +28,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
-	// Create a user (hash password, store in DB) and return basic info.
 	SignUp(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*User, error)
-	// Validate credentials and return a JWT to the client.
 	Login(ctx context.Context, in *Credentials, opts ...grpc.CallOption) (*Token, error)
-	// Validate a JWT and return the user payload (for gateway authz).
 	Verify(ctx context.Context, in *Token, opts ...grpc.CallOption) (*User, error)
 }
 
@@ -78,11 +75,8 @@ func (c *authServiceClient) Verify(ctx context.Context, in *Token, opts ...grpc.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
 type AuthServiceServer interface {
-	// Create a user (hash password, store in DB) and return basic info.
 	SignUp(context.Context, *Credentials) (*User, error)
-	// Validate credentials and return a JWT to the client.
 	Login(context.Context, *Credentials) (*Token, error)
-	// Validate a JWT and return the user payload (for gateway authz).
 	Verify(context.Context, *Token) (*User, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -213,13 +207,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FilesServiceClient interface {
-	// Read-only listing of metadata you own.
 	List(ctx context.Context, in *ListFilesRequest, opts ...grpc.CallOption) (*ListFilesResponse, error)
-	// After client finishes PUT, persist metadata record.
 	ConfirmUpload(ctx context.Context, in *ConfirmUploadRequest, opts ...grpc.CallOption) (*ConfirmUploadResponse, error)
-	// Soft-delete later; hard delete for MVP.
 	Delete(ctx context.Context, in *DeleteFileRequest, opts ...grpc.CallOption) (*DeleteFileResponse, error)
-	// We’ll later change this to return object_key and let gateway presign.
 	GetDownloadURL(ctx context.Context, in *DownloadURLRequest, opts ...grpc.CallOption) (*DownloadURLResponse, error)
 }
 
@@ -275,13 +265,9 @@ func (c *filesServiceClient) GetDownloadURL(ctx context.Context, in *DownloadURL
 // All implementations must embed UnimplementedFilesServiceServer
 // for forward compatibility.
 type FilesServiceServer interface {
-	// Read-only listing of metadata you own.
 	List(context.Context, *ListFilesRequest) (*ListFilesResponse, error)
-	// After client finishes PUT, persist metadata record.
 	ConfirmUpload(context.Context, *ConfirmUploadRequest) (*ConfirmUploadResponse, error)
-	// Soft-delete later; hard delete for MVP.
 	Delete(context.Context, *DeleteFileRequest) (*DeleteFileResponse, error)
-	// We’ll later change this to return object_key and let gateway presign.
 	GetDownloadURL(context.Context, *DownloadURLRequest) (*DownloadURLResponse, error)
 	mustEmbedUnimplementedFilesServiceServer()
 }

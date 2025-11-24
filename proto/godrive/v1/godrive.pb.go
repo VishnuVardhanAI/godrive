@@ -57,14 +57,12 @@ func (*Empty) Descriptor() ([]byte, []int) {
 	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{0}
 }
 
-///////////////////////////
-// Auth domain messages  //
-///////////////////////////
+// ===== Auth =====
 type User struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`                               // DB primary key
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`                          // unique email
-	CreatedAt     string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"` // ISO timestamp
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,3,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -123,7 +121,7 @@ func (x *User) GetCreatedAt() string {
 type Credentials struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
-	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"` // plaintext over TLS; stored hashed server-side
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -174,8 +172,8 @@ func (x *Credentials) GetPassword() string {
 
 type Token struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"` // JWT string
-	ExpiresAt     string                 `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`       // token expiry in ISO time
+	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
+	ExpiresAt     string                 `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -224,18 +222,16 @@ func (x *Token) GetExpiresAt() string {
 	return ""
 }
 
-///////////////////////////
-// Files domain messages //
-///////////////////////////
+// ===== Files (metadata only, not bytes) =====
 type FileItem struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`       // user ID that owns this file
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`                             // filename as user sees it
-	Mime          string                 `protobuf:"bytes,4,opt,name=mime,proto3" json:"mime,omitempty"`                             // MIME type
-	SizeBytes     int64                  `protobuf:"varint,5,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"` // size recorded on confirm
-	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`  // ISO timestamp
-	VersionId     string                 `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`  // placeholder for S3 versioning later
+	OwnerId       int64                  `protobuf:"varint,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Mime          string                 `protobuf:"bytes,4,opt,name=mime,proto3" json:"mime,omitempty"`
+	SizeBytes     int64                  `protobuf:"varint,5,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	VersionId     string                 `protobuf:"bytes,7,opt,name=version_id,json=versionId,proto3" json:"version_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -382,7 +378,7 @@ func (x *ListFilesRequest) GetPageSize() int32 {
 type ListFilesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Files         []*FileItem            `protobuf:"bytes,1,rep,name=files,proto3" json:"files,omitempty"`
-	NextPage      int32                  `protobuf:"varint,2,opt,name=next_page,json=nextPage,proto3" json:"next_page,omitempty"` // 0 if none
+	NextPage      int32                  `protobuf:"varint,2,opt,name=next_page,json=nextPage,proto3" json:"next_page,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -431,147 +427,10 @@ func (x *ListFilesResponse) GetNextPage() int32 {
 	return 0
 }
 
-// Client asks storage for an upload URL; gateway composes this request.
-type CreateUploadIntentRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	OwnerId       int64                  `protobuf:"varint,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	Filename      string                 `protobuf:"bytes,2,opt,name=filename,proto3" json:"filename,omitempty"`
-	Mime          string                 `protobuf:"bytes,3,opt,name=mime,proto3" json:"mime,omitempty"`
-	SizeBytes     int64                  `protobuf:"varint,4,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateUploadIntentRequest) Reset() {
-	*x = CreateUploadIntentRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateUploadIntentRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateUploadIntentRequest) ProtoMessage() {}
-
-func (x *CreateUploadIntentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateUploadIntentRequest.ProtoReflect.Descriptor instead.
-func (*CreateUploadIntentRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *CreateUploadIntentRequest) GetOwnerId() int64 {
-	if x != nil {
-		return x.OwnerId
-	}
-	return 0
-}
-
-func (x *CreateUploadIntentRequest) GetFilename() string {
-	if x != nil {
-		return x.Filename
-	}
-	return ""
-}
-
-func (x *CreateUploadIntentRequest) GetMime() string {
-	if x != nil {
-		return x.Mime
-	}
-	return ""
-}
-
-func (x *CreateUploadIntentRequest) GetSizeBytes() int64 {
-	if x != nil {
-		return x.SizeBytes
-	}
-	return 0
-}
-
-type CreateUploadIntentResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UploadUrl     string                 `protobuf:"bytes,1,opt,name=upload_url,json=uploadUrl,proto3" json:"upload_url,omitempty"`
-	ObjectKey     string                 `protobuf:"bytes,2,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"`                                                      // S3 object path (e.g., user/123/...)
-	Headers       map[string]string      `protobuf:"bytes,3,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // any required headers for PUT
-	ExpiresAt     string                 `protobuf:"bytes,4,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *CreateUploadIntentResponse) Reset() {
-	*x = CreateUploadIntentResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CreateUploadIntentResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreateUploadIntentResponse) ProtoMessage() {}
-
-func (x *CreateUploadIntentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreateUploadIntentResponse.ProtoReflect.Descriptor instead.
-func (*CreateUploadIntentResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *CreateUploadIntentResponse) GetUploadUrl() string {
-	if x != nil {
-		return x.UploadUrl
-	}
-	return ""
-}
-
-func (x *CreateUploadIntentResponse) GetObjectKey() string {
-	if x != nil {
-		return x.ObjectKey
-	}
-	return ""
-}
-
-func (x *CreateUploadIntentResponse) GetHeaders() map[string]string {
-	if x != nil {
-		return x.Headers
-	}
-	return nil
-}
-
-func (x *CreateUploadIntentResponse) GetExpiresAt() string {
-	if x != nil {
-		return x.ExpiresAt
-	}
-	return ""
-}
-
 type ConfirmUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OwnerId       int64                  `protobuf:"varint,1,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
-	ObjectKey     string                 `protobuf:"bytes,2,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"` // final S3 key the client PUT to
+	ObjectKey     string                 `protobuf:"bytes,2,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"`
 	Filename      string                 `protobuf:"bytes,3,opt,name=filename,proto3" json:"filename,omitempty"`
 	Mime          string                 `protobuf:"bytes,4,opt,name=mime,proto3" json:"mime,omitempty"`
 	SizeBytes     int64                  `protobuf:"varint,5,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
@@ -581,7 +440,7 @@ type ConfirmUploadRequest struct {
 
 func (x *ConfirmUploadRequest) Reset() {
 	*x = ConfirmUploadRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[9]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -593,7 +452,7 @@ func (x *ConfirmUploadRequest) String() string {
 func (*ConfirmUploadRequest) ProtoMessage() {}
 
 func (x *ConfirmUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[9]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -606,7 +465,7 @@ func (x *ConfirmUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmUploadRequest.ProtoReflect.Descriptor instead.
 func (*ConfirmUploadRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{9}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ConfirmUploadRequest) GetOwnerId() int64 {
@@ -653,7 +512,7 @@ type ConfirmUploadResponse struct {
 
 func (x *ConfirmUploadResponse) Reset() {
 	*x = ConfirmUploadResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[10]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -665,7 +524,7 @@ func (x *ConfirmUploadResponse) String() string {
 func (*ConfirmUploadResponse) ProtoMessage() {}
 
 func (x *ConfirmUploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[10]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -678,7 +537,7 @@ func (x *ConfirmUploadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmUploadResponse.ProtoReflect.Descriptor instead.
 func (*ConfirmUploadResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{10}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ConfirmUploadResponse) GetFile() *FileItem {
@@ -698,7 +557,7 @@ type DownloadURLRequest struct {
 
 func (x *DownloadURLRequest) Reset() {
 	*x = DownloadURLRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[11]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -710,7 +569,7 @@ func (x *DownloadURLRequest) String() string {
 func (*DownloadURLRequest) ProtoMessage() {}
 
 func (x *DownloadURLRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[11]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -723,7 +582,7 @@ func (x *DownloadURLRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadURLRequest.ProtoReflect.Descriptor instead.
 func (*DownloadURLRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{11}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *DownloadURLRequest) GetOwnerId() int64 {
@@ -742,7 +601,7 @@ func (x *DownloadURLRequest) GetFileId() int64 {
 
 type DownloadURLResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	DownloadUrl   string                 `protobuf:"bytes,1,opt,name=download_url,json=downloadUrl,proto3" json:"download_url,omitempty"` // pre-signed GET URL (or placeholder in first pass)
+	DownloadUrl   string                 `protobuf:"bytes,1,opt,name=download_url,json=downloadUrl,proto3" json:"download_url,omitempty"`
 	ExpiresAt     string                 `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -750,7 +609,7 @@ type DownloadURLResponse struct {
 
 func (x *DownloadURLResponse) Reset() {
 	*x = DownloadURLResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[12]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -762,7 +621,7 @@ func (x *DownloadURLResponse) String() string {
 func (*DownloadURLResponse) ProtoMessage() {}
 
 func (x *DownloadURLResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[12]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -775,7 +634,7 @@ func (x *DownloadURLResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadURLResponse.ProtoReflect.Descriptor instead.
 func (*DownloadURLResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{12}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DownloadURLResponse) GetDownloadUrl() string {
@@ -802,7 +661,7 @@ type DeleteFileRequest struct {
 
 func (x *DeleteFileRequest) Reset() {
 	*x = DeleteFileRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[13]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -814,7 +673,7 @@ func (x *DeleteFileRequest) String() string {
 func (*DeleteFileRequest) ProtoMessage() {}
 
 func (x *DeleteFileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[13]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -827,7 +686,7 @@ func (x *DeleteFileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFileRequest.ProtoReflect.Descriptor instead.
 func (*DeleteFileRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{13}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteFileRequest) GetOwnerId() int64 {
@@ -853,7 +712,7 @@ type DeleteFileResponse struct {
 
 func (x *DeleteFileResponse) Reset() {
 	*x = DeleteFileResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[14]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -865,7 +724,7 @@ func (x *DeleteFileResponse) String() string {
 func (*DeleteFileResponse) ProtoMessage() {}
 
 func (x *DeleteFileResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[14]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -878,7 +737,7 @@ func (x *DeleteFileResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteFileResponse.ProtoReflect.Descriptor instead.
 func (*DeleteFileResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{14}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DeleteFileResponse) GetOk() bool {
@@ -888,12 +747,9 @@ func (x *DeleteFileResponse) GetOk() bool {
 	return false
 }
 
-/////////////////////////////
-// Storage domain messages //
-/////////////////////////////
 type PresignUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ObjectKey     string                 `protobuf:"bytes,1,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"` // where the object will live
+	ObjectKey     string                 `protobuf:"bytes,1,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"`
 	Mime          string                 `protobuf:"bytes,2,opt,name=mime,proto3" json:"mime,omitempty"`
 	SizeBytes     int64                  `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -902,7 +758,7 @@ type PresignUploadRequest struct {
 
 func (x *PresignUploadRequest) Reset() {
 	*x = PresignUploadRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[15]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -914,7 +770,7 @@ func (x *PresignUploadRequest) String() string {
 func (*PresignUploadRequest) ProtoMessage() {}
 
 func (x *PresignUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[15]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -927,7 +783,7 @@ func (x *PresignUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignUploadRequest.ProtoReflect.Descriptor instead.
 func (*PresignUploadRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{15}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *PresignUploadRequest) GetObjectKey() string {
@@ -953,8 +809,8 @@ func (x *PresignUploadRequest) GetSizeBytes() int64 {
 
 type PresignUploadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`                                                                                   // PUT URL
-	Headers       map[string]string      `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // e.g., Content-Type if required
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	Headers       map[string]string      `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	ExpiresAt     string                 `protobuf:"bytes,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -962,7 +818,7 @@ type PresignUploadResponse struct {
 
 func (x *PresignUploadResponse) Reset() {
 	*x = PresignUploadResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[16]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -974,7 +830,7 @@ func (x *PresignUploadResponse) String() string {
 func (*PresignUploadResponse) ProtoMessage() {}
 
 func (x *PresignUploadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[16]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -987,7 +843,7 @@ func (x *PresignUploadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignUploadResponse.ProtoReflect.Descriptor instead.
 func (*PresignUploadResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{16}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *PresignUploadResponse) GetUrl() string {
@@ -1020,7 +876,7 @@ type PresignDownloadRequest struct {
 
 func (x *PresignDownloadRequest) Reset() {
 	*x = PresignDownloadRequest{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[17]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1032,7 +888,7 @@ func (x *PresignDownloadRequest) String() string {
 func (*PresignDownloadRequest) ProtoMessage() {}
 
 func (x *PresignDownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[17]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1045,7 +901,7 @@ func (x *PresignDownloadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignDownloadRequest.ProtoReflect.Descriptor instead.
 func (*PresignDownloadRequest) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{17}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *PresignDownloadRequest) GetObjectKey() string {
@@ -1057,7 +913,7 @@ func (x *PresignDownloadRequest) GetObjectKey() string {
 
 type PresignDownloadResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"` // GET URL
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
 	ExpiresAt     string                 `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1065,7 +921,7 @@ type PresignDownloadResponse struct {
 
 func (x *PresignDownloadResponse) Reset() {
 	*x = PresignDownloadResponse{}
-	mi := &file_godrive_v1_godrive_proto_msgTypes[18]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1077,7 +933,7 @@ func (x *PresignDownloadResponse) String() string {
 func (*PresignDownloadResponse) ProtoMessage() {}
 
 func (x *PresignDownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_godrive_v1_godrive_proto_msgTypes[18]
+	mi := &file_godrive_v1_godrive_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1090,7 +946,7 @@ func (x *PresignDownloadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PresignDownloadResponse.ProtoReflect.Descriptor instead.
 func (*PresignDownloadResponse) Descriptor() ([]byte, []int) {
-	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{18}
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *PresignDownloadResponse) GetUrl() string {
@@ -1143,24 +999,7 @@ const file_godrive_v1_godrive_proto_rawDesc = "" +
 	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\\\n" +
 	"\x11ListFilesResponse\x12*\n" +
 	"\x05files\x18\x01 \x03(\v2\x14.godrive.v1.FileItemR\x05files\x12\x1b\n" +
-	"\tnext_page\x18\x02 \x01(\x05R\bnextPage\"\x85\x01\n" +
-	"\x19CreateUploadIntentRequest\x12\x19\n" +
-	"\bowner_id\x18\x01 \x01(\x03R\aownerId\x12\x1a\n" +
-	"\bfilename\x18\x02 \x01(\tR\bfilename\x12\x12\n" +
-	"\x04mime\x18\x03 \x01(\tR\x04mime\x12\x1d\n" +
-	"\n" +
-	"size_bytes\x18\x04 \x01(\x03R\tsizeBytes\"\x84\x02\n" +
-	"\x1aCreateUploadIntentResponse\x12\x1d\n" +
-	"\n" +
-	"upload_url\x18\x01 \x01(\tR\tuploadUrl\x12\x1d\n" +
-	"\n" +
-	"object_key\x18\x02 \x01(\tR\tobjectKey\x12M\n" +
-	"\aheaders\x18\x03 \x03(\v23.godrive.v1.CreateUploadIntentResponse.HeadersEntryR\aheaders\x12\x1d\n" +
-	"\n" +
-	"expires_at\x18\x04 \x01(\tR\texpiresAt\x1a:\n" +
-	"\fHeadersEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x9f\x01\n" +
+	"\tnext_page\x18\x02 \x01(\x05R\bnextPage\"\x9f\x01\n" +
 	"\x14ConfirmUploadRequest\x12\x19\n" +
 	"\bowner_id\x18\x01 \x01(\x03R\aownerId\x12\x1d\n" +
 	"\n" +
@@ -1229,58 +1068,54 @@ func file_godrive_v1_godrive_proto_rawDescGZIP() []byte {
 	return file_godrive_v1_godrive_proto_rawDescData
 }
 
-var file_godrive_v1_godrive_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_godrive_v1_godrive_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
 var file_godrive_v1_godrive_proto_goTypes = []any{
-	(*Empty)(nil),                      // 0: godrive.v1.Empty
-	(*User)(nil),                       // 1: godrive.v1.User
-	(*Credentials)(nil),                // 2: godrive.v1.Credentials
-	(*Token)(nil),                      // 3: godrive.v1.Token
-	(*FileItem)(nil),                   // 4: godrive.v1.FileItem
-	(*ListFilesRequest)(nil),           // 5: godrive.v1.ListFilesRequest
-	(*ListFilesResponse)(nil),          // 6: godrive.v1.ListFilesResponse
-	(*CreateUploadIntentRequest)(nil),  // 7: godrive.v1.CreateUploadIntentRequest
-	(*CreateUploadIntentResponse)(nil), // 8: godrive.v1.CreateUploadIntentResponse
-	(*ConfirmUploadRequest)(nil),       // 9: godrive.v1.ConfirmUploadRequest
-	(*ConfirmUploadResponse)(nil),      // 10: godrive.v1.ConfirmUploadResponse
-	(*DownloadURLRequest)(nil),         // 11: godrive.v1.DownloadURLRequest
-	(*DownloadURLResponse)(nil),        // 12: godrive.v1.DownloadURLResponse
-	(*DeleteFileRequest)(nil),          // 13: godrive.v1.DeleteFileRequest
-	(*DeleteFileResponse)(nil),         // 14: godrive.v1.DeleteFileResponse
-	(*PresignUploadRequest)(nil),       // 15: godrive.v1.PresignUploadRequest
-	(*PresignUploadResponse)(nil),      // 16: godrive.v1.PresignUploadResponse
-	(*PresignDownloadRequest)(nil),     // 17: godrive.v1.PresignDownloadRequest
-	(*PresignDownloadResponse)(nil),    // 18: godrive.v1.PresignDownloadResponse
-	nil,                                // 19: godrive.v1.CreateUploadIntentResponse.HeadersEntry
-	nil,                                // 20: godrive.v1.PresignUploadResponse.HeadersEntry
+	(*Empty)(nil),                   // 0: godrive.v1.Empty
+	(*User)(nil),                    // 1: godrive.v1.User
+	(*Credentials)(nil),             // 2: godrive.v1.Credentials
+	(*Token)(nil),                   // 3: godrive.v1.Token
+	(*FileItem)(nil),                // 4: godrive.v1.FileItem
+	(*ListFilesRequest)(nil),        // 5: godrive.v1.ListFilesRequest
+	(*ListFilesResponse)(nil),       // 6: godrive.v1.ListFilesResponse
+	(*ConfirmUploadRequest)(nil),    // 7: godrive.v1.ConfirmUploadRequest
+	(*ConfirmUploadResponse)(nil),   // 8: godrive.v1.ConfirmUploadResponse
+	(*DownloadURLRequest)(nil),      // 9: godrive.v1.DownloadURLRequest
+	(*DownloadURLResponse)(nil),     // 10: godrive.v1.DownloadURLResponse
+	(*DeleteFileRequest)(nil),       // 11: godrive.v1.DeleteFileRequest
+	(*DeleteFileResponse)(nil),      // 12: godrive.v1.DeleteFileResponse
+	(*PresignUploadRequest)(nil),    // 13: godrive.v1.PresignUploadRequest
+	(*PresignUploadResponse)(nil),   // 14: godrive.v1.PresignUploadResponse
+	(*PresignDownloadRequest)(nil),  // 15: godrive.v1.PresignDownloadRequest
+	(*PresignDownloadResponse)(nil), // 16: godrive.v1.PresignDownloadResponse
+	nil,                             // 17: godrive.v1.PresignUploadResponse.HeadersEntry
 }
 var file_godrive_v1_godrive_proto_depIdxs = []int32{
 	4,  // 0: godrive.v1.ListFilesResponse.files:type_name -> godrive.v1.FileItem
-	19, // 1: godrive.v1.CreateUploadIntentResponse.headers:type_name -> godrive.v1.CreateUploadIntentResponse.HeadersEntry
-	4,  // 2: godrive.v1.ConfirmUploadResponse.file:type_name -> godrive.v1.FileItem
-	20, // 3: godrive.v1.PresignUploadResponse.headers:type_name -> godrive.v1.PresignUploadResponse.HeadersEntry
-	2,  // 4: godrive.v1.AuthService.SignUp:input_type -> godrive.v1.Credentials
-	2,  // 5: godrive.v1.AuthService.Login:input_type -> godrive.v1.Credentials
-	3,  // 6: godrive.v1.AuthService.Verify:input_type -> godrive.v1.Token
-	5,  // 7: godrive.v1.FilesService.List:input_type -> godrive.v1.ListFilesRequest
-	9,  // 8: godrive.v1.FilesService.ConfirmUpload:input_type -> godrive.v1.ConfirmUploadRequest
-	13, // 9: godrive.v1.FilesService.Delete:input_type -> godrive.v1.DeleteFileRequest
-	11, // 10: godrive.v1.FilesService.GetDownloadURL:input_type -> godrive.v1.DownloadURLRequest
-	15, // 11: godrive.v1.StorageService.PresignUpload:input_type -> godrive.v1.PresignUploadRequest
-	17, // 12: godrive.v1.StorageService.PresignDownload:input_type -> godrive.v1.PresignDownloadRequest
-	1,  // 13: godrive.v1.AuthService.SignUp:output_type -> godrive.v1.User
-	3,  // 14: godrive.v1.AuthService.Login:output_type -> godrive.v1.Token
-	1,  // 15: godrive.v1.AuthService.Verify:output_type -> godrive.v1.User
-	6,  // 16: godrive.v1.FilesService.List:output_type -> godrive.v1.ListFilesResponse
-	10, // 17: godrive.v1.FilesService.ConfirmUpload:output_type -> godrive.v1.ConfirmUploadResponse
-	14, // 18: godrive.v1.FilesService.Delete:output_type -> godrive.v1.DeleteFileResponse
-	12, // 19: godrive.v1.FilesService.GetDownloadURL:output_type -> godrive.v1.DownloadURLResponse
-	16, // 20: godrive.v1.StorageService.PresignUpload:output_type -> godrive.v1.PresignUploadResponse
-	18, // 21: godrive.v1.StorageService.PresignDownload:output_type -> godrive.v1.PresignDownloadResponse
-	13, // [13:22] is the sub-list for method output_type
-	4,  // [4:13] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	4,  // 1: godrive.v1.ConfirmUploadResponse.file:type_name -> godrive.v1.FileItem
+	17, // 2: godrive.v1.PresignUploadResponse.headers:type_name -> godrive.v1.PresignUploadResponse.HeadersEntry
+	2,  // 3: godrive.v1.AuthService.SignUp:input_type -> godrive.v1.Credentials
+	2,  // 4: godrive.v1.AuthService.Login:input_type -> godrive.v1.Credentials
+	3,  // 5: godrive.v1.AuthService.Verify:input_type -> godrive.v1.Token
+	5,  // 6: godrive.v1.FilesService.List:input_type -> godrive.v1.ListFilesRequest
+	7,  // 7: godrive.v1.FilesService.ConfirmUpload:input_type -> godrive.v1.ConfirmUploadRequest
+	11, // 8: godrive.v1.FilesService.Delete:input_type -> godrive.v1.DeleteFileRequest
+	9,  // 9: godrive.v1.FilesService.GetDownloadURL:input_type -> godrive.v1.DownloadURLRequest
+	13, // 10: godrive.v1.StorageService.PresignUpload:input_type -> godrive.v1.PresignUploadRequest
+	15, // 11: godrive.v1.StorageService.PresignDownload:input_type -> godrive.v1.PresignDownloadRequest
+	1,  // 12: godrive.v1.AuthService.SignUp:output_type -> godrive.v1.User
+	3,  // 13: godrive.v1.AuthService.Login:output_type -> godrive.v1.Token
+	1,  // 14: godrive.v1.AuthService.Verify:output_type -> godrive.v1.User
+	6,  // 15: godrive.v1.FilesService.List:output_type -> godrive.v1.ListFilesResponse
+	8,  // 16: godrive.v1.FilesService.ConfirmUpload:output_type -> godrive.v1.ConfirmUploadResponse
+	12, // 17: godrive.v1.FilesService.Delete:output_type -> godrive.v1.DeleteFileResponse
+	10, // 18: godrive.v1.FilesService.GetDownloadURL:output_type -> godrive.v1.DownloadURLResponse
+	14, // 19: godrive.v1.StorageService.PresignUpload:output_type -> godrive.v1.PresignUploadResponse
+	16, // 20: godrive.v1.StorageService.PresignDownload:output_type -> godrive.v1.PresignDownloadResponse
+	12, // [12:21] is the sub-list for method output_type
+	3,  // [3:12] is the sub-list for method input_type
+	3,  // [3:3] is the sub-list for extension type_name
+	3,  // [3:3] is the sub-list for extension extendee
+	0,  // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_godrive_v1_godrive_proto_init() }
@@ -1294,7 +1129,7 @@ func file_godrive_v1_godrive_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_godrive_v1_godrive_proto_rawDesc), len(file_godrive_v1_godrive_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   18,
 			NumExtensions: 0,
 			NumServices:   3,
 		},
