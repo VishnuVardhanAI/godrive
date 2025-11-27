@@ -16,7 +16,7 @@ It supports authenticated uploads, direct-to-storage presigned URLs, event-drive
 - **HTTP Gateway** for external clients (Gin)
 
 
-## Architecture Overview (Plain English)
+## Architecture Overview
 
 The system is split into several small services, each responsible for one thing:
 
@@ -50,10 +50,7 @@ A background worker that periodically:
 - **NATS** → event bus  
 - **Docker Compose** → dev orchestration
 
----
-
 ## How the Upload Flow Works
-----------------------------
 
 1. Client logs in and receives a JWT.  
 2. Client requests an upload URL from the Gateway.  
@@ -65,12 +62,8 @@ A background worker that periodically:
    and calls Files Service to insert metadata.  
 8. The file now appears in `/files`.
 
-This mirrors how S3-powered apps handle uploads.
-
----
 
 ## Delete Flow (Soft Delete + Background Purge)
------------------------------------------------
 
 1. Client calls `DELETE /files/:id`.  
 2. Files Service marks the DB row with `deleted_at`.  
@@ -81,10 +74,7 @@ This mirrors how S3-powered apps handle uploads.
 
 Keeps deletes fast for the user and reliable on the backend.
 
----
-
 ## Tech Stack
--------------
 
 - Go 1.22+  
 - Gin  
@@ -94,5 +84,3 @@ Keeps deletes fast for the user and reliable on the backend.
 - NATS  
 - Docker & Docker Compose  
 - Buf (for proto codegen)
-
----
