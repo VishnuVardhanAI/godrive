@@ -1,139 +1,118 @@
-# GoDrive – Cloud Storage Backend in Go (Microservices)
+GoDrive – Cloud Storage Backend (Go Microservices)
 
-GoDrive is a mini Google Drive–style backend built with Go microservices.  
-It supports:
+GoDrive is a cloud-storage backend built with Go and a modern microservice architecture.
+It supports authenticated uploads, event-driven processing, and background cleanup — all running across independent services tied together with gRPC and Docker.
 
-- User signup & login with JWT
-- Presigned uploads directly to S3-compatible storage (MinIO)
-- Event-driven ingest of completed uploads via NATS
-- File metadata listing / download URLs
-- Soft-delete with async background purge (janitor worker)
-- Fully Dockerized stack (Postgres, MinIO, NATS, Jaeger, services)
+Features
 
----
+User signup & login (bcrypt + JWT)
 
-## Features
+Presigned URLs for direct file uploads to MinIO
 
-- **Microservices architecture**
-  - `gateway` – HTTP API (Gin) → internal gRPC
-  - `auth` – user auth, password hashing, JWT issuing / verification
-  - `files` – file metadata & ownership in Postgres
-  - `storage` – S3/MinIO presigned URLs & object deletion
-  - `ingest` – consumes MinIO → NATS events, confirms uploads
-  - `janitor` – async soft-delete cleanup (deletes objects + DB rows)
+Event-driven ingest pipeline using MinIO bucket notifications + NATS
 
-- **Auth**
-  - Email + password signup
-  - Bcrypt hashing
-  - Stateless JWT access tokens (HS256)
-  - Gateway middleware for `Authorization: Bearer <token>`
+Metadata service backed by Postgres (file info, pagination, ownership)
 
-- **File handling**
-  - Presigned PUT URLs → client uploads directly to MinIO
-  - Files are stored under `user/<uid>/<timestamp>_<filename>`
-  - Metadata stored in Postgres (`files` table)
-  - Listing supports pagination
-  - Download URLs are presigned GET URLs from storage service
+Download URLs via presigned GET
 
-- **Deletion model**
-  - `DELETE /files/:id` → marks row as soft-deleted (`deleted_at`)
-  - `janitor` periodically:
-    - finds soft-deleted rows older than a grace period
-    - calls `storage.DeleteObject` to delete from MinIO
-    - removes the DB row if storage delete succeeds
+Soft delete with a background worker that removes old files from storage
 
-- **Infra**
-  - Postgres 16
-  - MinIO (S3-compatible)
-  - NATS
-  - Docker Compose for local dev
+Microservices architecture connected via gRPC
 
----
+Single HTTP gateway for the outside world (Gin)
 
-## Architecture Overview
+Architecture Overview (plain English)
 
-### High-level architecture
+The system is split into several small services:
 
-```mermaid
-graph TD
-    Client[Client (Postman / Frontend)] -->|HTTP JSON| Gateway
+Gateway
 
-    subgraph Services
-        Gateway[Gateway (Gin HTTP)] -->|gRPC| Auth[AuthService]
-        Gateway -->|gRPC| Files[FilesService]
-        Gateway -->|gRPC| Storage[StorageService]
+The public-facing HTTP API.
+All external requests go through this. It talks to internal services using gRPC.
 
-        Files -->|gRPC (presign download)| Storage
-        Ingest[IngestService] -->|gRPC (ConfirmUpload)| Files
-        Janitor[JanitorService] -->|gRPC (DeleteObject)| Storage
-        Janitor -->|SQL| PG[(Postgres)]
-        Auth -->|SQL| PG
-        Files -->|SQL| PG
-    end
+Auth Service
 
-    subgraph Infra
-        MinIO[(MinIO S3)]
-        NATS[(NATS)]
-    end
+Handles signup, login, password hashing, and JWT verification.
 
-    Storage -->|S3 SDK| MinIO
-    MinIO -->|Bucket Notifications| NATS
-    NATS -->|subject godrive.uploaded| Ingest
+Files Service
 
-sequenceDiagram
-    participant C as Client
-    participant G as Gateway
-    participant A as AuthService
-    participant S as StorageService
-    participant M as MinIO
-    participant I as IngestService
-    participant F as FilesService
-    participant PG as Postgres
+Manages file metadata in Postgres.
+Does not store file bytes—just file info, ownership, timestamps, and soft-delete flags.
 
-    C->>G: POST /login (email, password)
-    G->>A: Login(Credentials)
-    A-->>G: Token (JWT)
-    G-->>C: { token }
+Storage Service
 
-    C->>G: POST /files/upload-intent (JWT, filename, mime, size)
-    G->>S: PresignUpload(object_key, mime, size)
-    S->>M: Generate presigned PUT URL
-    M-->>S: URL
-    S-->>G: PresignUploadResponse(url)
-    G-->>C: { upload_url, object_key }
+Generates presigned upload/download URLs and deletes objects from MinIO.
 
-    C->>M: PUT upload_url (file bytes)
+Ingest Service
 
-    M-->>NATS: event "godrive.uploaded"
-    NATS-->>I: event payload
-    I->>F: ConfirmUpload(owner_id, object_key, filename, size)
-    F->>PG: INSERT INTO files(...)
-    PG-->>F: row id
-    F-->>I: ConfirmUploadResponse
+Listens to MinIO → NATS events.
+Whenever a user finishes uploading through a presigned URL, MinIO emits an event, and the ingest service confirms the upload by inserting a row into Postgres.
 
-sequenceDiagram
-    participant C as Client
-    participant G as Gateway
-    participant F as FilesService
-    participant PG as Postgres
-    participant J as Janitor
-    participant S as StorageService
-    participant M as MinIO
+Janitor Service
 
-    C->>G: DELETE /files/:id (JWT)
-    G->>F: Delete(owner_id, file_id)
-    F->>PG: UPDATE files SET deleted_at = now()
-    PG-->>F: rows affected
-    F-->>G: { ok: true }
-    G-->>C: { deleted: id }
+Background worker that periodically scans for files that were soft-deleted and are old enough to purge.
+If storage deletion succeeds, it removes the metadata row.
 
-    loop every minute (janitor)
-        J->>PG: SELECT id, object_key FROM files WHERE deleted_at < now() - grace
-        PG-->>J: rows to purge
-        J->>S: DeleteObject(object_key)
-        S->>M: Delete object
-        M-->>S: OK
-        S-->>J: { ok: true }
-        J->>PG: DELETE FROM files WHERE id = ?
-        PG-->>J: OK
-    end
+Infrastructure
+
+Postgres for user & file metadata
+
+MinIO for actual file storage
+
+NATS for upload-completed events
+
+Docker Compose to run everything locally
+
+How the Upload Flow Works
+
+Client logs in and receives a JWT.
+
+Client asks the gateway for an upload URL.
+
+Gateway → Storage Service: “generate a presigned URL for this file.”
+
+Storage returns a signed PUT URL.
+
+Client uploads file bytes directly to MinIO (backend never touches them).
+
+MinIO emits an “object created” event to NATS.
+
+Ingest Service receives the event, extracts the user + filename, and calls Files Service to record the metadata.
+
+File now appears in GET /files.
+
+This mirrors how S3-backed systems handle uploads.
+
+Delete Flow (Soft Delete + Background Purge)
+
+Client sends DELETE /files/:id
+
+Files Service marks the row with a deleted_at timestamp
+
+A background worker (janitor) periodically:
+
+Finds old soft-deleted rows
+
+Calls Storage Service to remove the file from MinIO
+
+Deletes the DB row if removal succeeds
+
+This avoids long waits during a DELETE and follows the pattern used by most cloud storage platforms.
+
+Tech Stack
+
+Go 1.22+
+
+Gin (Gateway)
+
+gRPC + Protocol Buffers
+
+Postgres (pgx)
+
+MinIO (S3-compatible object storage)
+
+NATS (event bus)
+
+Docker & Docker Compose
+
+Buf (for proto generation)
