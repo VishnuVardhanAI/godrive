@@ -415,6 +415,7 @@ var FilesService_ServiceDesc = grpc.ServiceDesc{
 const (
 	StorageService_PresignUpload_FullMethodName   = "/godrive.v1.StorageService/PresignUpload"
 	StorageService_PresignDownload_FullMethodName = "/godrive.v1.StorageService/PresignDownload"
+	StorageService_DeleteObject_FullMethodName    = "/godrive.v1.StorageService/DeleteObject"
 )
 
 // StorageServiceClient is the client API for StorageService service.
@@ -423,6 +424,7 @@ const (
 type StorageServiceClient interface {
 	PresignUpload(ctx context.Context, in *PresignUploadRequest, opts ...grpc.CallOption) (*PresignUploadResponse, error)
 	PresignDownload(ctx context.Context, in *PresignDownloadRequest, opts ...grpc.CallOption) (*PresignDownloadResponse, error)
+	DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error)
 }
 
 type storageServiceClient struct {
@@ -453,12 +455,23 @@ func (c *storageServiceClient) PresignDownload(ctx context.Context, in *PresignD
 	return out, nil
 }
 
+func (c *storageServiceClient) DeleteObject(ctx context.Context, in *DeleteObjectRequest, opts ...grpc.CallOption) (*DeleteObjectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteObjectResponse)
+	err := c.cc.Invoke(ctx, StorageService_DeleteObject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // StorageServiceServer is the server API for StorageService service.
 // All implementations must embed UnimplementedStorageServiceServer
 // for forward compatibility.
 type StorageServiceServer interface {
 	PresignUpload(context.Context, *PresignUploadRequest) (*PresignUploadResponse, error)
 	PresignDownload(context.Context, *PresignDownloadRequest) (*PresignDownloadResponse, error)
+	DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error)
 	mustEmbedUnimplementedStorageServiceServer()
 }
 
@@ -474,6 +487,9 @@ func (UnimplementedStorageServiceServer) PresignUpload(context.Context, *Presign
 }
 func (UnimplementedStorageServiceServer) PresignDownload(context.Context, *PresignDownloadRequest) (*PresignDownloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PresignDownload not implemented")
+}
+func (UnimplementedStorageServiceServer) DeleteObject(context.Context, *DeleteObjectRequest) (*DeleteObjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteObject not implemented")
 }
 func (UnimplementedStorageServiceServer) mustEmbedUnimplementedStorageServiceServer() {}
 func (UnimplementedStorageServiceServer) testEmbeddedByValue()                        {}
@@ -532,6 +548,24 @@ func _StorageService_PresignDownload_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StorageService_DeleteObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteObjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StorageServiceServer).DeleteObject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: StorageService_DeleteObject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StorageServiceServer).DeleteObject(ctx, req.(*DeleteObjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // StorageService_ServiceDesc is the grpc.ServiceDesc for StorageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -546,6 +580,10 @@ var StorageService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PresignDownload",
 			Handler:    _StorageService_PresignDownload_Handler,
+		},
+		{
+			MethodName: "DeleteObject",
+			Handler:    _StorageService_DeleteObject_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

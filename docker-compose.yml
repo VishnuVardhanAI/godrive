@@ -15,12 +15,14 @@ services:
     environment:
       MINIO_ROOT_USER: godrive
       MINIO_ROOT_PASSWORD: godrivepass
-      # NATS target for bucket notifications
-      MINIO_NOTIFY_NATS_ENABLE_UPLOADS: "on"
-      MINIO_NOTIFY_NATS_ADDRESS_UPLOADS: "nats:4222"
-      MINIO_NOTIFY_NATS_SUBJECT_UPLOADS: "godrive.uploaded"
-    ports: ["9000:9000", "9001:9001"]
-    volumes: [miniodata:/data]
+      MINIO_NOTIFY_NATS_ENABLE: "on"
+      MINIO_NOTIFY_NATS_ADDRESS: "nats:4222"
+      MINIO_NOTIFY_NATS_SUBJECT: "godrive.uploaded"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
 
   nats:
     image: nats:2.10
@@ -67,6 +69,16 @@ services:
       NATS_URL: "nats://nats:4222"
       FILES_ADDR: "files:50052"   # gRPC endpoint for FilesService
     depends_on: [nats, files]
+
+  janitor:
+    build:
+      context: .
+      dockerfile: services/janitor/Dockerfile
+    environment:
+      DB_DSN: "postgres://godrive:godrive@postgres:5432/godrive?sslmode=disable"
+      STORAGE_ADDR: "storage:50053"
+      GRACE_PERIOD: "1m"    # for dev; change to "720h" (30 days) later
+    depends_on: [postgres, storage]
 
   gateway:
     build:

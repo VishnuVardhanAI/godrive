@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -76,7 +77,15 @@ func handleEvent(ctx context.Context, filesClient gv1.FilesServiceClient, data [
 			continue
 		}
 
-		objectKey := rec.S3.Object.Key
+		rawKey := rec.S3.Object.Key
+
+		decodedKey, err := url.QueryUnescape(rawKey)
+		if err != nil {
+			log.Printf("failed to unescape key %q: %v", rawKey, err)
+			continue
+		}
+
+		objectKey := decodedKey
 		size := rec.S3.Object.Size
 
 		ownerID, filename, ok := parseObjectKey(objectKey)
@@ -86,7 +95,7 @@ func handleEvent(ctx context.Context, filesClient gv1.FilesServiceClient, data [
 		}
 
 		cctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-		_, err := filesClient.ConfirmUpload(cctx, &gv1.ConfirmUploadRequest{
+		_, err = filesClient.ConfirmUpload(cctx, &gv1.ConfirmUploadRequest{
 			OwnerId:   ownerID,
 			ObjectKey: objectKey,
 			Filename:  filename,

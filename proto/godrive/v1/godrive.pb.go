@@ -963,6 +963,94 @@ func (x *PresignDownloadResponse) GetExpiresAt() string {
 	return ""
 }
 
+type DeleteObjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ObjectKey     string                 `protobuf:"bytes,1,opt,name=object_key,json=objectKey,proto3" json:"object_key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteObjectRequest) Reset() {
+	*x = DeleteObjectRequest{}
+	mi := &file_godrive_v1_godrive_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteObjectRequest) ProtoMessage() {}
+
+func (x *DeleteObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_godrive_v1_godrive_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteObjectRequest.ProtoReflect.Descriptor instead.
+func (*DeleteObjectRequest) Descriptor() ([]byte, []int) {
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *DeleteObjectRequest) GetObjectKey() string {
+	if x != nil {
+		return x.ObjectKey
+	}
+	return ""
+}
+
+type DeleteObjectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteObjectResponse) Reset() {
+	*x = DeleteObjectResponse{}
+	mi := &file_godrive_v1_godrive_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteObjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteObjectResponse) ProtoMessage() {}
+
+func (x *DeleteObjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_godrive_v1_godrive_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteObjectResponse.ProtoReflect.Descriptor instead.
+func (*DeleteObjectResponse) Descriptor() ([]byte, []int) {
+	return file_godrive_v1_godrive_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeleteObjectResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
 var File_godrive_v1_godrive_proto protoreflect.FileDescriptor
 
 const file_godrive_v1_godrive_proto_rawDesc = "" +
@@ -1042,7 +1130,12 @@ const file_godrive_v1_godrive_proto_rawDesc = "" +
 	"\x17PresignDownloadResponse\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x02 \x01(\tR\texpiresAt2\xa6\x01\n" +
+	"expires_at\x18\x02 \x01(\tR\texpiresAt\"4\n" +
+	"\x13DeleteObjectRequest\x12\x1d\n" +
+	"\n" +
+	"object_key\x18\x01 \x01(\tR\tobjectKey\"&\n" +
+	"\x14DeleteObjectResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok2\xa6\x01\n" +
 	"\vAuthService\x123\n" +
 	"\x06SignUp\x12\x17.godrive.v1.Credentials\x1a\x10.godrive.v1.User\x123\n" +
 	"\x05Login\x12\x17.godrive.v1.Credentials\x1a\x11.godrive.v1.Token\x12-\n" +
@@ -1051,10 +1144,11 @@ const file_godrive_v1_godrive_proto_rawDesc = "" +
 	"\x04List\x12\x1c.godrive.v1.ListFilesRequest\x1a\x1d.godrive.v1.ListFilesResponse\x12T\n" +
 	"\rConfirmUpload\x12 .godrive.v1.ConfirmUploadRequest\x1a!.godrive.v1.ConfirmUploadResponse\x12G\n" +
 	"\x06Delete\x12\x1d.godrive.v1.DeleteFileRequest\x1a\x1e.godrive.v1.DeleteFileResponse\x12Q\n" +
-	"\x0eGetDownloadURL\x12\x1e.godrive.v1.DownloadURLRequest\x1a\x1f.godrive.v1.DownloadURLResponse2\xc2\x01\n" +
+	"\x0eGetDownloadURL\x12\x1e.godrive.v1.DownloadURLRequest\x1a\x1f.godrive.v1.DownloadURLResponse2\x95\x02\n" +
 	"\x0eStorageService\x12T\n" +
 	"\rPresignUpload\x12 .godrive.v1.PresignUploadRequest\x1a!.godrive.v1.PresignUploadResponse\x12Z\n" +
-	"\x0fPresignDownload\x12\".godrive.v1.PresignDownloadRequest\x1a#.godrive.v1.PresignDownloadResponseB$Z\"godrive/proto/godrive/v1;godrivev1b\x06proto3"
+	"\x0fPresignDownload\x12\".godrive.v1.PresignDownloadRequest\x1a#.godrive.v1.PresignDownloadResponse\x12Q\n" +
+	"\fDeleteObject\x12\x1f.godrive.v1.DeleteObjectRequest\x1a .godrive.v1.DeleteObjectResponseB$Z\"godrive/proto/godrive/v1;godrivev1b\x06proto3"
 
 var (
 	file_godrive_v1_godrive_proto_rawDescOnce sync.Once
@@ -1068,7 +1162,7 @@ func file_godrive_v1_godrive_proto_rawDescGZIP() []byte {
 	return file_godrive_v1_godrive_proto_rawDescData
 }
 
-var file_godrive_v1_godrive_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_godrive_v1_godrive_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
 var file_godrive_v1_godrive_proto_goTypes = []any{
 	(*Empty)(nil),                   // 0: godrive.v1.Empty
 	(*User)(nil),                    // 1: godrive.v1.User
@@ -1087,12 +1181,14 @@ var file_godrive_v1_godrive_proto_goTypes = []any{
 	(*PresignUploadResponse)(nil),   // 14: godrive.v1.PresignUploadResponse
 	(*PresignDownloadRequest)(nil),  // 15: godrive.v1.PresignDownloadRequest
 	(*PresignDownloadResponse)(nil), // 16: godrive.v1.PresignDownloadResponse
-	nil,                             // 17: godrive.v1.PresignUploadResponse.HeadersEntry
+	(*DeleteObjectRequest)(nil),     // 17: godrive.v1.DeleteObjectRequest
+	(*DeleteObjectResponse)(nil),    // 18: godrive.v1.DeleteObjectResponse
+	nil,                             // 19: godrive.v1.PresignUploadResponse.HeadersEntry
 }
 var file_godrive_v1_godrive_proto_depIdxs = []int32{
 	4,  // 0: godrive.v1.ListFilesResponse.files:type_name -> godrive.v1.FileItem
 	4,  // 1: godrive.v1.ConfirmUploadResponse.file:type_name -> godrive.v1.FileItem
-	17, // 2: godrive.v1.PresignUploadResponse.headers:type_name -> godrive.v1.PresignUploadResponse.HeadersEntry
+	19, // 2: godrive.v1.PresignUploadResponse.headers:type_name -> godrive.v1.PresignUploadResponse.HeadersEntry
 	2,  // 3: godrive.v1.AuthService.SignUp:input_type -> godrive.v1.Credentials
 	2,  // 4: godrive.v1.AuthService.Login:input_type -> godrive.v1.Credentials
 	3,  // 5: godrive.v1.AuthService.Verify:input_type -> godrive.v1.Token
@@ -1102,17 +1198,19 @@ var file_godrive_v1_godrive_proto_depIdxs = []int32{
 	9,  // 9: godrive.v1.FilesService.GetDownloadURL:input_type -> godrive.v1.DownloadURLRequest
 	13, // 10: godrive.v1.StorageService.PresignUpload:input_type -> godrive.v1.PresignUploadRequest
 	15, // 11: godrive.v1.StorageService.PresignDownload:input_type -> godrive.v1.PresignDownloadRequest
-	1,  // 12: godrive.v1.AuthService.SignUp:output_type -> godrive.v1.User
-	3,  // 13: godrive.v1.AuthService.Login:output_type -> godrive.v1.Token
-	1,  // 14: godrive.v1.AuthService.Verify:output_type -> godrive.v1.User
-	6,  // 15: godrive.v1.FilesService.List:output_type -> godrive.v1.ListFilesResponse
-	8,  // 16: godrive.v1.FilesService.ConfirmUpload:output_type -> godrive.v1.ConfirmUploadResponse
-	12, // 17: godrive.v1.FilesService.Delete:output_type -> godrive.v1.DeleteFileResponse
-	10, // 18: godrive.v1.FilesService.GetDownloadURL:output_type -> godrive.v1.DownloadURLResponse
-	14, // 19: godrive.v1.StorageService.PresignUpload:output_type -> godrive.v1.PresignUploadResponse
-	16, // 20: godrive.v1.StorageService.PresignDownload:output_type -> godrive.v1.PresignDownloadResponse
-	12, // [12:21] is the sub-list for method output_type
-	3,  // [3:12] is the sub-list for method input_type
+	17, // 12: godrive.v1.StorageService.DeleteObject:input_type -> godrive.v1.DeleteObjectRequest
+	1,  // 13: godrive.v1.AuthService.SignUp:output_type -> godrive.v1.User
+	3,  // 14: godrive.v1.AuthService.Login:output_type -> godrive.v1.Token
+	1,  // 15: godrive.v1.AuthService.Verify:output_type -> godrive.v1.User
+	6,  // 16: godrive.v1.FilesService.List:output_type -> godrive.v1.ListFilesResponse
+	8,  // 17: godrive.v1.FilesService.ConfirmUpload:output_type -> godrive.v1.ConfirmUploadResponse
+	12, // 18: godrive.v1.FilesService.Delete:output_type -> godrive.v1.DeleteFileResponse
+	10, // 19: godrive.v1.FilesService.GetDownloadURL:output_type -> godrive.v1.DownloadURLResponse
+	14, // 20: godrive.v1.StorageService.PresignUpload:output_type -> godrive.v1.PresignUploadResponse
+	16, // 21: godrive.v1.StorageService.PresignDownload:output_type -> godrive.v1.PresignDownloadResponse
+	18, // 22: godrive.v1.StorageService.DeleteObject:output_type -> godrive.v1.DeleteObjectResponse
+	13, // [13:23] is the sub-list for method output_type
+	3,  // [3:13] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1129,7 +1227,7 @@ func file_godrive_v1_godrive_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_godrive_v1_godrive_proto_rawDesc), len(file_godrive_v1_godrive_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

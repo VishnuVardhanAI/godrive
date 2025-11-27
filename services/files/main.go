@@ -69,12 +69,20 @@ func (s *server) List(ctx context.Context, in *gv1.ListFilesRequest) (*gv1.ListF
 	offset := (page - 1) * pageSize
 
 	rows, err := s.db.Query(ctx, `
-SELECT id, owner_id, name, mime, size_bytes, created_at, version_id
-FROM files
-WHERE owner_id = $1
-ORDER BY created_at DESC
-LIMIT $2 OFFSET $3`, in.OwnerId, pageSize, offset)
+		SELECT id,
+			owner_id,
+			name,
+			mime,
+			size_bytes,
+			created_at,
+			COALESCE(version_id, '') AS version_id
+		FROM files
+		WHERE owner_id = $1
+		AND deleted_at IS NULL
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3`, in.OwnerId, pageSize, offset)
 	if err != nil {
+		log.Printf("List query error: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -84,10 +92,16 @@ LIMIT $2 OFFSET $3`, in.OwnerId, pageSize, offset)
 		var f gv1.FileItem
 		var created time.Time
 		if err := rows.Scan(&f.Id, &f.OwnerId, &f.Name, &f.Mime, &f.SizeBytes, &created, &f.VersionId); err != nil {
+			log.Printf("List scan error: %v", err)
 			return nil, err
 		}
 		f.CreatedAt = created.UTC().Format(time.RFC3339)
 		files = append(files, &f)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("List rows error: %v", err)
+		return nil, err
 	}
 
 	nextPage := int32(0)
@@ -161,10 +175,13 @@ func (s *server) GetDownloadURL(ctx context.Context, in *gv1.DownloadURLRequest)
 }
 
 func (s *server) Delete(ctx context.Context, in *gv1.DeleteFileRequest) (*gv1.DeleteFileResponse, error) {
-	ct, err := s.db.Exec(ctx,
-		`DELETE FROM files WHERE id = $1 AND owner_id = $2`,
-		in.FileId, in.OwnerId,
-	)
+	ct, err := s.db.Exec(ctx, `
+		UPDATE files
+		SET deleted_at = NOW()
+		WHERE id = $1
+		AND owner_id = $2
+		AND deleted_at IS NULL
+		`, in.FileId, in.OwnerId)
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +199,8 @@ CREATE TABLE IF NOT EXISTS files (
   size_bytes BIGINT NOT NULL,
   object_key TEXT NOT NULL,
   version_id TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  deleted_at TIMESTAMPTZ
 );`)
 	return err
 }

@@ -113,7 +113,16 @@ message PresignDownloadResponse {
   string expires_at = 2;
 }
 
+message DeleteObjectRequest {
+  string object_key = 1;
+}
+
+message DeleteObjectResponse {
+  bool ok = 1;
+}
+
 service StorageService {
   rpc PresignUpload (PresignUploadRequest) returns (PresignUploadResponse);
   rpc PresignDownload (PresignDownloadRequest) returns (PresignDownloadResponse);
+  rpc DeleteObject (DeleteObjectRequest) returns (DeleteObjectResponse);
 }
