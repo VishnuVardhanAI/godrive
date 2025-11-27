@@ -11,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type server struct {
@@ -31,9 +32,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	storageConn, err := grpc.Dial(storageAddr, grpc.WithInsecure())
+	storageConn, err := grpc.NewClient(
+		storageAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("dial storage: %v", err)
 	}
 
 	s := &server{

@@ -13,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type deps struct {
@@ -22,9 +23,30 @@ type deps struct {
 }
 
 func main() {
-	authConn, _ := grpc.Dial(env("AUTH_ADDR", "auth:50051"), grpc.WithInsecure())
-	filesConn, _ := grpc.Dial(env("FILES_ADDR", "files:50052"), grpc.WithInsecure())
-	storageConn, _ := grpc.Dial(env("STORAGE_ADDR", "storage:50053"), grpc.WithInsecure())
+
+	authConn, err := grpc.NewClient(
+		env("AUTH_ADDR", "auth:50051"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("dial auth: %v", err)
+	}
+
+	filesConn, err := grpc.NewClient(
+		env("FILES_ADDR", "files:50052"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("dial files: %v", err)
+	}
+
+	storageConn, err := grpc.NewClient(
+		env("STORAGE_ADDR", "storage:50053"),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Fatalf("dial storage: %v", err)
+	}
 
 	d := &deps{
 		auth:    gv1.NewAuthServiceClient(authConn),

@@ -14,6 +14,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 // Minimal S3/MinIO event payload model.
@@ -42,9 +43,12 @@ func main() {
 	}
 	defer nc.Drain()
 
-	filesConn, err := grpc.Dial(filesAddr, grpc.WithInsecure())
+	filesConn, err := grpc.NewClient(
+		filesAddr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		log.Fatalf("dial files service: %v", err)
+		log.Fatalf("dial files: %v", err)
 	}
 	defer filesConn.Close()
 
