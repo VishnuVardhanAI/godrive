@@ -79,3 +79,61 @@ graph TD
     Storage -->|S3 SDK| MinIO
     MinIO -->|Bucket Notifications| NATS
     NATS -->|subject godrive.uploaded| Ingest
+
+sequenceDiagram
+    participant C as Client
+    participant G as Gateway
+    participant A as AuthService
+    participant S as StorageService
+    participant M as MinIO
+    participant I as IngestService
+    participant F as FilesService
+    participant PG as Postgres
+
+    C->>G: POST /login (email, password)
+    G->>A: Login(Credentials)
+    A-->>G: Token (JWT)
+    G-->>C: { token }
+
+    C->>G: POST /files/upload-intent (JWT, filename, mime, size)
+    G->>S: PresignUpload(object_key, mime, size)
+    S->>M: Generate presigned PUT URL
+    M-->>S: URL
+    S-->>G: PresignUploadResponse(url)
+    G-->>C: { upload_url, object_key }
+
+    C->>M: PUT upload_url (file bytes)
+
+    M-->>NATS: event "godrive.uploaded"
+    NATS-->>I: event payload
+    I->>F: ConfirmUpload(owner_id, object_key, filename, size)
+    F->>PG: INSERT INTO files(...)
+    PG-->>F: row id
+    F-->>I: ConfirmUploadResponse
+
+sequenceDiagram
+    participant C as Client
+    participant G as Gateway
+    participant F as FilesService
+    participant PG as Postgres
+    participant J as Janitor
+    participant S as StorageService
+    participant M as MinIO
+
+    C->>G: DELETE /files/:id (JWT)
+    G->>F: Delete(owner_id, file_id)
+    F->>PG: UPDATE files SET deleted_at = now()
+    PG-->>F: rows affected
+    F-->>G: { ok: true }
+    G-->>C: { deleted: id }
+
+    loop every minute (janitor)
+        J->>PG: SELECT id, object_key FROM files WHERE deleted_at < now() - grace
+        PG-->>J: rows to purge
+        J->>S: DeleteObject(object_key)
+        S->>M: Delete object
+        M-->>S: OK
+        S-->>J: { ok: true }
+        J->>PG: DELETE FROM files WHERE id = ?
+        PG-->>J: OK
+    end
