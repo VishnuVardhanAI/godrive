@@ -6,7 +6,6 @@ It supports authenticated uploads, direct-to-storage presigned URLs, event-drive
 ---
 
 ## Features
---------
 
 - **User signup & login** (bcrypt + JWT)  
 - **Presigned URLs** for direct file uploads to MinIO  
