@@ -1,5 +1,4 @@
 # GoDrive – Cloud Storage Backend (Go + Microservices)
-=====================================================
 
 GoDrive is a cloud-storage backend built with Go and a modern microservice architecture.  
 It supports authenticated uploads, direct-to-storage presigned URLs, event-driven ingest, and background cleanup — all running across independent services connected with gRPC and Docker.
