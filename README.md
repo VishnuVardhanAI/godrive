@@ -1,20 +1,38 @@
 # GoDrive – Cloud Storage Backend (Go + Microservices)
 
-GoDrive is a cloud-storage backend built with Go and a modern microservice architecture.  
-It supports authenticated uploads, direct-to-storage presigned URLs, event-driven ingest, and background cleanup — all running across independent services connected with gRPC and Docker.
+GoDrive is a cloud-storage backend that lets users upload, store, and manage files — similar to the core backend behind services like Google Drive or Dropbox.  
+It handles user authentication, direct-to-storage uploads, file metadata management, and automated cleanup, all running across independent services.
 
+Under the hood, GoDrive uses a modern microservice architecture built with Go, gRPC, PostgreSQL, MinIO (S3-compatible object storage), and NATS for asynchronous background processing.
+
+---
+
+## How It Works (High-Level)
+
+1. **Users sign up and log in** using a JWT-based auth service.
+2. **Uploads happen via presigned URLs**, which allow files to go directly to MinIO without passing through backend services.
+3. **MinIO triggers upload events**, which are published to NATS.
+4. **Background workers consume these events** and insert file metadata into PostgreSQL.
+5. **Files can be soft-deleted**, and a cleanup worker permanently removes them after a grace period.
+6. **All internal services communicate over gRPC**, while external clients use an HTTP gateway built with Gin.
+
+This design mirrors real cloud-storage architectures: storage is decoupled, metadata is centralized, and all heavy processing is event-driven.
+
+---
 
 ## Features
 
-- **User signup & login** (bcrypt + JWT)  
-- **Presigned URLs** for direct file uploads to MinIO  
-- **Event-driven ingest pipeline** using MinIO → NATS  
-- **File metadata service** backed by Postgres  
-- **Presigned download URLs** for secure file access  
-- **Soft delete** with automatic background purge  
-- **Microservices connected via gRPC**  
-- **HTTP Gateway** for external clients (Gin)
+- **User authentication** (bcrypt + JWT)
+- **Presigned URLs** for direct file uploads to MinIO
+- **Event-driven background processing** (MinIO → NATS → worker)
+- **File metadata service** backed by PostgreSQL
+- **Presigned download URLs** for secure file access
+- **Soft deletion** with automatic cleanup workers
+- **Independent microservices** communicating over gRPC
+- **HTTP Gateway** (Gin) for external access
+- **Containerized setup** using Docker Compose
 
+---
 
 ## Architecture Overview
 
@@ -50,6 +68,8 @@ A background worker that periodically:
 - **NATS** → event bus  
 - **Docker Compose** → dev orchestration
 
+---
+
 ## How the Upload Flow Works
 
 1. Client logs in and receives a JWT.  
@@ -74,13 +94,14 @@ A background worker that periodically:
 
 Keeps deletes fast for the user and reliable on the backend.
 
+---
+
 ## Tech Stack
 
-- Go 1.22+  
-- Gin  
-- gRPC + Protocol Buffers  
-- Postgres (pgx)  
-- MinIO (S3-compatible object store)  
-- NATS  
-- Docker & Docker Compose  
-- Buf (for proto codegen)
+- **Language:** Go  
+- **APIs:** gRPC, REST (Gin)  
+- **Storage:** MinIO (S3-compatible object store), PostgreSQL  
+- **Messaging:** NATS  
+- **Auth:** JWT, bcrypt  
+- **Containerization:** Docker Compose  
+- **Dev Tools:** Makefiles, Protoc, Postman  
