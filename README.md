@@ -33,7 +33,9 @@ This design mirrors real cloud-storage architectures: storage is decoupled, meta
 
 ---
 
-## Architecture Diagram
+## Architecture Overview
+
+### Architecture Diagram
 
 ```mermaid
 flowchart LR
@@ -68,22 +70,32 @@ flowchart LR
         H["Cleanup Worker (delete expired files)"]
     end
 
+    %% User -> Gateway
     A --> B
+
+    %% Gateway -> Services
     B --> C
     B --> D
     B --> E
 
+    %% Auth Service -> Postgres
+    C --> DB
+
+    %% Metadata Service -> Postgres
+    D --> DB
+
+    %% Upload Event from MinIO
     E -. "upload event" .-> F
     F --> G
     G --> D
 
-    D --> DB
-
+    %% Soft delete -> cleanup
     D -. "soft delete" .-> H
     H --> E
-```
 
-The system is split into several small services, each responsible for one thing:
+    %% User -> MinIO (presigned URL upload)
+    A -. "presigned URL upload" .-> E
+```
 
 ### **Gateway**
 The public-facing HTTP API.  
