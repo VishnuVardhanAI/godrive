@@ -37,7 +37,7 @@ This design mirrors real cloud-storage architectures: storage is decoupled, meta
 
 ## Architecture Diagram
 
-mermaid
+```mermaid
 flowchart LR
 
     subgraph Client
@@ -83,7 +83,7 @@ flowchart LR
 
     D -. soft delete .-> H
     H --> E
-
+```
 
 The system is split into several small services, each responsible for one thing:
 
