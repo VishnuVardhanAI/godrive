@@ -35,6 +35,56 @@ This design mirrors real cloud-storage architectures: storage is decoupled, meta
 
 ## Architecture Overview
 
+## Architecture Diagram
+
+mermaid
+flowchart LR
+
+    subgraph Client
+        A[User / Frontend]
+    end
+
+    subgraph Gateway
+        B[HTTP Gateway<br/>(Gin)]
+    end
+
+    subgraph AuthService
+        C[Auth Service<br/>JWT + bcrypt]
+    end
+
+    subgraph MetadataService
+        D[Metadata Service<br/>Go + PostgreSQL]
+        DB[(PostgreSQL)]
+    end
+
+    subgraph Storage
+        E[MinIO<br/>Object Storage]
+    end
+
+    subgraph Messaging
+        F[NATS<br/>Event Bus]
+    end
+
+    subgraph Workers
+        G[Upload Worker<br/>(record metadata)]
+        H[Cleanup Worker<br/>(delete expired files)]
+    end
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+
+    E -. upload event .-> F
+    F --> G
+    G --> D
+
+    D --> DB
+
+    D -. soft delete .-> H
+    H --> E
+
+
 The system is split into several small services, each responsible for one thing:
 
 ### **Gateway**
